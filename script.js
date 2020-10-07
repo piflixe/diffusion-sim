@@ -1,4 +1,26 @@
 
+var imageLoader = document.getElementById('imageLoader');
+imageLoader.addEventListener('change', handleImage, false);
+
+
+
+function handleImage(e){
+    var reader = new FileReader();
+    reader.onload = function(event){
+        var img = new Image();
+        img.onload = function(){
+            var c = document.getElementById("myCanvas");
+	        var ctx = c.getContext("2d");
+            c.width = img.width;
+            c.height = img.height;
+            ctx.drawImage(img,0,0);
+        }
+        img.src = event.target.result;
+    }
+    reader.readAsDataURL(e.target.files[0]);     
+}
+
+
 var draw_data = function() {
 	var c = document.getElementById("myCanvas");
 	var ctx = c.getContext("2d");
@@ -25,25 +47,15 @@ var draw_data = function() {
 
 var buttonclick = function() {
 		console.log("button clicked");
-		draw_data();
-		read_image();
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+        var imageData = ctx.getImageData(0, 0, c.width, c.height);
+        var imgData = black_white(imageData);
+        ctx.putImageData(imgData, 0, 0);
+	    console.log("imgData"+imgData,imageData);
 }
 
-var read_image = function() {
-	var c = document.getElementById("myCanvas");
-	var ctx = c.getContext("2d");
-	const image = new Image;
-	image.src = "testbild.jpg";
-	image.onload = () => {
-	  ctx.drawImage(image, 0, 0);
-	  imageData = ctx.getImageData(0, 0, 300, 311);
-	  black_white(imageData);
-	  console.log(imageData);
-	}
-}
-
-var black_white = function(imageData) {
-	//var imgData = ctx.createImageData(500, 500);
+var black_white = function(imgData) {
 	var i;
 	for (i = 0; i < imgData.data.length; i += 4) {
 	  var sum = imgData.data[i + 0]+imgData.data[i + 1]+imgData.data[i + 2];
@@ -53,5 +65,6 @@ var black_white = function(imageData) {
 	  imgData.data[i + 2] = avg;
 	  imgData.data[i + 3] = 255;
 	}
-	ctx.putImageData(imgData, 10, 10);
+    console.log("black_white finished");
+    return imgData;
 }
